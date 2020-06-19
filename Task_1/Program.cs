@@ -11,46 +11,41 @@ namespace Task_1
     {
         public static Thread t;
         public static readonly Random rnd = new Random();
-        public static int NumberOfParticipants;
+        public static int numberOfParticipants;
         public static int secretNumber;
         public static List<Thread> participantList = new List<Thread>();
         public static bool correctGuess = false;
-        public static readonly Mutex m = new Mutex();
         public static readonly object l = new object();
         static void Main(string[] args)
-        {
+        {  
             Console.WriteLine("\t\t\tWelcome to Number Guessing Game!");
             Thread t1 = new Thread(FirstThreadJob);
             Thread t2 = new Thread(SecondThreadJob);
             t2.Name = "Thread_Generator";
             t1.Start();
-            t1.Join();
             t2.Start();
             t2.Join();
             foreach (var participant in participantList)
-            {                
-                participant.Start();
-               
+            {
+                lock (l)
+                {
+                    participant.Start();
+                }          
             }
             Console.ReadLine();
         }
         public static void FirstThreadJob()
         {
-            int temp = 0;
-            do
-            {
-                Console.WriteLine("How many participants will there be?");
-            } while (int.TryParse(Console.ReadLine(), out temp)!= true);
-            setNumberOfParticipants(temp);
+            SetSetNumberOfPeople();  
             secretNumber = rnd.Next(1, 100);
-            Console.WriteLine("");
+            Console.WriteLine("User chose "+numberOfParticipants+" participants.\nRandom number is generated.\nGood luck!");
         }
         public static void SecondThreadJob()
         {
-            int temp = getNumberOfParticipants();
+            int temp = SetSetNumberOfPeople();
             for (int i = 1; i < temp+1; i++)
             {
-               t = new Thread(guessingMethod);
+                t = new Thread(guessingMethod);
                 t.Name = string.Format("Participant_" + i);
                 participantList.Add(t);
             }
@@ -79,20 +74,25 @@ namespace Task_1
                 }
                 Thread.Sleep(100);
             }
-                  
         }
-        public static int getNumberOfParticipants()
+        public static int SetSetNumberOfPeople()
         {
             lock (l)
             {
-                return NumberOfParticipants;
-            }
-        }
-        public static void setNumberOfParticipants(int num)
-        {
-            lock (l)
-            {
-                NumberOfParticipants = num;
+                if (numberOfParticipants == 0)
+                {
+                    int temp = 0;
+                    do
+                    {
+                        Console.WriteLine("How many participants will there be?");
+                    } while (int.TryParse(Console.ReadLine(), out temp) != true);
+                    numberOfParticipants = temp;
+                    return 0;
+                }
+                else
+                {
+                    return numberOfParticipants;
+                }               
             }
         }
     }
