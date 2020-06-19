@@ -22,19 +22,16 @@ namespace Task_1
             Console.WriteLine("\t\t\tWelcome to Number Guessing Game!");
             Thread t1 = new Thread(FirstThreadJob);
             Thread t2 = new Thread(SecondThreadJob);
+            t2.Name = "Thread_Generator";
             t1.Start();
             t1.Join();
             t2.Start();
             t2.Join();
-            do
-            {
-                foreach (var participant in participantList)
-                {
-                    int temporary = rnd.Next(1, 100);
-                    participant.Start(temporary);
-                    Thread.Sleep(100);
-                }
-            } while (correctGuess == false);
+            foreach (var participant in participantList)
+            {                
+                participant.Start();
+               
+            }
             Console.ReadLine();
         }
         public static void FirstThreadJob()
@@ -46,6 +43,7 @@ namespace Task_1
             } while (int.TryParse(Console.ReadLine(), out temp)!= true);
             setNumberOfParticipants(temp);
             secretNumber = rnd.Next(1, 100);
+            Console.WriteLine("");
         }
         public static void SecondThreadJob()
         {
@@ -57,21 +55,31 @@ namespace Task_1
                 participantList.Add(t);
             }
         }
-        public static void guessingMethod(object guess)
-        {                        
-            if (correctGuess == false)
+        public static void guessingMethod()
+        {
+            while (correctGuess == false)
             {
-                Console.WriteLine(Thread.CurrentThread.Name + " is guessing with number " + (int)guess);
-                if (secretNumber == (int)guess)
+                int guess = rnd.Next(1, 100);
+                Console.WriteLine(Thread.CurrentThread.Name + " is guessing with number " + guess);
+                if (secretNumber == guess)
                 {
                     Console.WriteLine(Thread.CurrentThread.Name + " won");
                     correctGuess = true;
                 }
                 else
                 {
-                    Console.WriteLine("Wrong guess");
+                    if (secretNumber % 2 == guess % 2)
+                    {
+                        Console.WriteLine(Thread.CurrentThread.Name + " guessed number parity");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Wrong guess");
+                    }
                 }
+                Thread.Sleep(100);
             }
+                  
         }
         public static int getNumberOfParticipants()
         {
