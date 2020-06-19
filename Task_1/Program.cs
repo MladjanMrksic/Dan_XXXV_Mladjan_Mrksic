@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Task_1
 {
@@ -25,24 +23,20 @@ namespace Task_1
             t1.Start();
             t2.Start();
             t2.Join();
+            t1.Join();
             foreach (var participant in participantList)
             {
-                lock (l)
-                {
-                    participant.Start();
-                }          
+                participant.Start();
             }
             Console.ReadLine();
         }
         public static void FirstThreadJob()
         {
-            SetSetNumberOfPeople();  
-            secretNumber = rnd.Next(1, 100);
-            Console.WriteLine("User chose "+numberOfParticipants+" participants.\nRandom number is generated.\nGood luck!");
+            GameSetup();  
         }
         public static void SecondThreadJob()
         {
-            int temp = SetSetNumberOfPeople();
+            int temp = GameSetup();
             for (int i = 1; i < temp+1; i++)
             {
                 t = new Thread(guessingMethod);
@@ -54,28 +48,27 @@ namespace Task_1
         {
             while (correctGuess == false)
             {
-                int guess = rnd.Next(1, 100);
-                Console.WriteLine(Thread.CurrentThread.Name + " is guessing with number " + guess);
-                if (secretNumber == guess)
+                lock (l)
                 {
-                    Console.WriteLine(Thread.CurrentThread.Name + " won");
-                    correctGuess = true;
-                }
-                else
-                {
-                    if (secretNumber % 2 == guess % 2)
+                    int guess = rnd.Next(1, 100);
+                    Console.WriteLine(Thread.CurrentThread.Name + " is guessing with number " + guess);
+                    if (secretNumber == guess)
                     {
-                        Console.WriteLine(Thread.CurrentThread.Name + " guessed number parity");
+                        Console.WriteLine(Thread.CurrentThread.Name + " won");
+                        correctGuess = true;
                     }
                     else
                     {
-                        Console.WriteLine("Wrong guess");
+                        if (secretNumber % 2 == guess % 2)
+                            Console.WriteLine(Thread.CurrentThread.Name + " guessed number parity");
+                        else
+                            Console.WriteLine("Wrong guess");
                     }
-                }
+                }                
                 Thread.Sleep(100);
             }
         }
-        public static int SetSetNumberOfPeople()
+        public static int GameSetup()
         {
             lock (l)
             {
@@ -87,12 +80,15 @@ namespace Task_1
                         Console.WriteLine("How many participants will there be?");
                     } while (int.TryParse(Console.ReadLine(), out temp) != true);
                     numberOfParticipants = temp;
+                    do
+                    {
+                        Console.WriteLine("Please enter a number from 1-100 that participants need to guess.");
+                    } while (int.TryParse(Console.ReadLine(), out secretNumber) != true || Enumerable.Range(1, 100).Contains(secretNumber) != true);
+                    Console.WriteLine("User chose " + numberOfParticipants + " participants.\nRandom number is chosen.\nGood luck!");
                     return 0;
                 }
                 else
-                {
                     return numberOfParticipants;
-                }               
             }
         }
     }
