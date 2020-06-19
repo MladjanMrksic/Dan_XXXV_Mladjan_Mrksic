@@ -9,6 +9,7 @@ namespace Task_1
 {
     class Program
     {
+        public static Thread t;
         public static readonly Random rnd = new Random();
         public static int NumberOfParticipants;
         public static int secretNumber;
@@ -31,6 +32,7 @@ namespace Task_1
                 {
                     int temporary = rnd.Next(1, 100);
                     participant.Start(temporary);
+                    Thread.Sleep(100);
                 }
             } while (correctGuess == false);
             Console.ReadLine();
@@ -48,22 +50,22 @@ namespace Task_1
         public static void SecondThreadJob()
         {
             int temp = getNumberOfParticipants();
-            for (int i = 0; i < temp; i++)
+            for (int i = 1; i < temp+1; i++)
             {
-                Thread t = new Thread(guessingMethod);
-                t.Name = string.Format("Participant_" + i + 1);
+               t = new Thread(guessingMethod);
+                t.Name = string.Format("Participant_" + i);
                 participantList.Add(t);
             }
         }
         public static void guessingMethod(object guess)
-        {
-            Thread.Sleep(100);
-            Console.WriteLine(Thread.CurrentThread.Name + " is guessing with number " + (int)guess);
+        {                        
             if (correctGuess == false)
             {
+                Console.WriteLine(Thread.CurrentThread.Name + " is guessing with number " + (int)guess);
                 if (secretNumber == (int)guess)
                 {
                     Console.WriteLine(Thread.CurrentThread.Name + " won");
+                    correctGuess = true;
                 }
                 else
                 {
