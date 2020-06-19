@@ -22,7 +22,7 @@ namespace Task_1
             Thread t2 = new Thread(SecondThreadJob);
             t2.Name = "Thread_Generator";
             t1.Start();
-            t2.Start();
+            t2.Start();            
             t2.Join();
             t1.Join();
             //Looping through participantsList and starting each thread
@@ -41,6 +41,8 @@ namespace Task_1
         //SecondThreadJob creates threads, names them and adds them to the participantsList
         public static void SecondThreadJob()
         {
+            //Thread.Sleep(5) to make sure thread1 starts first
+            Thread.Sleep(5);
             int temp = GameSetup();
             for (int i = 1; i < temp+1; i++)
             {
@@ -58,23 +60,27 @@ namespace Task_1
                 //Lock ensures that only one thread can access the critical section
                 lock (l)
                 {
-                    //Random number is generated and compared against the scretNumber
-                    int guess = rnd.Next(1, 100);
-                    Console.WriteLine(Thread.CurrentThread.Name + " is guessing with number " + guess);
-                    if (secretNumber == guess)
+                    if (correctGuess == false)
                     {
-                        //If the number is correct, correctGuess is changed to true so no more tries are attempted
-                        Console.WriteLine(Thread.CurrentThread.Name + " won");
-                        correctGuess = true;
-                    }
-                    else
-                    {
-                        //If the number is not correct, it's checked if it has the same parity as the secretNumber
-                        if (secretNumber % 2 == guess % 2)
-                            Console.WriteLine(Thread.CurrentThread.Name + " guessed number parity");
+                        //Random number is generated and compared against the scretNumber
+                        int guess = rnd.Next(1, 100);
+                        Console.WriteLine(Thread.CurrentThread.Name + " is guessing with number " + guess);
+                        if (secretNumber == guess)
+                        {
+                            //If the number is correct, correctGuess is changed to true so no more tries are attempted
+                            Console.WriteLine(Thread.CurrentThread.Name + " guessed the correct number with " + guess + "!!!");
+                            correctGuess = true;
+                        }
                         else
-                            Console.WriteLine("Wrong guess");
+                        {
+                            //If the number is not correct, it's checked if it has the same parity as the secretNumber
+                            if (secretNumber % 2 == guess % 2)
+                                Console.WriteLine(Thread.CurrentThread.Name + " guessed number parity");
+                            else
+                                Console.WriteLine("Wrong guess");
+                        }
                     }
+
                 }
                 Thread.Sleep(100);
             }
